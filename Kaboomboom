@@ -1,0 +1,149 @@
+#include <Adafruit_CircuitPlayground.h>
+
+//setting up score holder
+int score = 100;
+
+//setting up level set (set to 0 for case0, 1 for case 1)
+volatile int levelCounter = 0;
+
+//setting up action keys
+const int leftButton = 4;
+const int rightButton = 5;
+
+//establishing action flags
+volatile bool leftButtonFlag = false;
+volatile bool rightButtonFlag = false;
+
+//detection for if left button is changed
+void leftButtonPressed()
+{
+  leftButtonFlag = true;
+}
+
+//detection for if right button is changed
+void rightButtonPressed()
+{
+  rightButtonFlag = true;
+}
+
+void setup() 
+{
+  CircuitPlayground.begin();
+  Serial.begin(9600);
+
+  pinMode(leftButton, INPUT_PULLDOWN); //Left button, pulldown enabled.
+  pinMode(rightButton, INPUT_PULLDOWN); //Right button, pulldown enabled.
+
+  attachInterrupt(digitalPinToInterrupt(leftButton), leftButtonPressed, RISING);
+  attachInterrupt(digitalPinToInterrupt(rightButton), rightButtonPressed, RISING);
+}
+
+void loop() 
+{
+  switch(levelCounter)
+  {
+    case 0:
+      levelOne();
+      break;
+    default:
+    CircuitPlayground.clearPixels();
+  }
+}
+
+void levelOne() //The first level layout (1 Target - Slow Speed)
+{
+  CircuitPlayground.setPixelColor(4, 0xFFFF00); //establish target location
+
+  for(int i = 0; i < 10; i++)
+  {
+
+    //Serial.println(score);
+
+    if(i != 4) //if current pin isn't 4, current led turn white, wait, current led turn off.
+    {
+      CircuitPlayground.setPixelColor(i, 0xFFFFFF);
+      delay(500);
+      CircuitPlayground.setPixelColor(i, 0x000000);
+
+      if(leftButtonFlag) //Briefly blink red and reduce score by 25%, follow by beep.
+      {
+        if(score > 0)
+        {
+          CircuitPlayground.setPixelColor(i, 0xFF0000);
+          delay(50);
+          CircuitPlayground.setPixelColor(i, 0x000000);
+          CircuitPlayground.playTone(130.81, 100); //C3 Note - 1ms
+          delay(50);
+          score = score - 25;
+        }
+        if(score == 0)
+        {
+          //break; //cue game over
+        }
+        leftButtonFlag = false;
+      }
+    }
+    else if(i = 4) //if current pin is 4, current led turns yellow (stays yellow)...wait, and move on.
+    {
+      CircuitPlayground.setPixelColor(i, 0xFFFF00);
+      delay(500);
+
+      if(leftButtonFlag) //if left button detect a click, turn off led and play a beep. Display score and play melody. Level counter +1.
+      {
+        CircuitPlayground.setPixelColor(i, 0x000000);
+        leftButtonFlag = false;
+        CircuitPlayground.playTone(261.63, 100); //C4 Note - 1/10th s
+        CircuitPlayground.clearPixels();
+        delay(1000);
+        //[insert better song here later]
+        CircuitPlayground.playTone(261.63, 100); //C4 - 1/10th s
+        CircuitPlayground.playTone(293.67, 100); //D4 - 1/10th s
+        CircuitPlayground.playTone(329.63, 100); //E4 - 1/10th s
+
+        delay(1000);
+        levelCounter = 1; //set level counter to level 2 (case 1)
+      }
+    }
+
+    /*
+    if(leftButtonFlag) //if left button detect a click, at i is at 4, turn off led. Otherwise, briefly blink red and reduce score by 25%.
+    {
+      if(i = 4)
+      {
+        CircuitPlayground.setPixelColor(i, 0x000000);
+        //break; //cue level cleared
+      }
+      else
+      {
+        if(score > 0)
+        {
+          CircuitPlayground.setPixelColor(i, 0xFF0000);
+          delay(50);
+          CircuitPlayground.setPixelColor(i, 0x000000);
+          score = score - 25;
+        }
+        if(score = 0)
+        {
+          break; //cue game over
+        }
+      }
+      leftButtonFlag = false;
+    }
+    */
+
+  }
+}
+
+/*
+  Ideas...
+    - Create lvls and set them as true or false in the main loop.
+    - Start off with lvl 1 as true. Once cleared, turn false, and set lvl 2 true.
+    - This would require designing the loop each level individually, outside the main loop.
+    - With that said, the only thing coded inside the main loop would be the striker.
+    - Once a striker land on a target (established in each level outside), play a sound.
+    - Once lvl is clear, play melody, wait 5 seconds, and move onto next level.
+
+    Extra
+    - 0xFFC0CB (Pink)
+    - 0xFFFF00 (Yellow)
+*/

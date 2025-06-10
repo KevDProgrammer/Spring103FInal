@@ -3,7 +3,7 @@
 //setting up score holder
 int score = 100;
 
-//setting up level set (set to 0 for case0, 1 for case 1)
+//setting up level set (set to 0 for case 0, 1 for case 1)
 volatile int levelCounter = 0;
 
 //setting up action keys
@@ -45,19 +45,25 @@ void loop()
     case 0:
       levelOne();
       break;
+    case 1:
+      levelTwo();
+      break;
+    case 2:
+      scoreBoard();
+      break;
     default:
     CircuitPlayground.clearPixels();
   }
 }
 
-void levelOne() //The first level layout (1 Target - Slow Speed)
+void levelOne() //Case 0: The first level layout (1 Target - Slow Speed)
 {
   CircuitPlayground.setPixelColor(4, 0xFFFF00); //establish target location
 
-  for(int i = 0; i < 10; i++)
+  for(int i = 0; i < 10; i++) //go through all the led one at a time
   {
 
-    //Serial.println(score);
+    Serial.println(score); //display current score in serial (optional feature)
 
     if(i != 4) //if current pin isn't 4, current led turn white, wait, current led turn off.
     {
@@ -65,22 +71,23 @@ void levelOne() //The first level layout (1 Target - Slow Speed)
       delay(500);
       CircuitPlayground.setPixelColor(i, 0x000000);
 
-      if(leftButtonFlag) //Briefly blink red and reduce score by 25%, follow by beep.
+      if(leftButtonFlag || rightButtonFlag) //Briefly blink red and reduce score by 25%, follow by beep.
       {
         if(score > 0)
         {
           CircuitPlayground.setPixelColor(i, 0xFF0000);
           delay(50);
           CircuitPlayground.setPixelColor(i, 0x000000);
-          CircuitPlayground.playTone(130.81, 100); //C3 Note - 1ms
+          CircuitPlayground.playTone(130.81, 100); //C3 Note - 1/10th s
           delay(50);
           score = score - 25;
         }
         if(score == 0)
         {
-          //break; //cue game over
+          levelCounter = 2; //cue game over
         }
         leftButtonFlag = false;
+        rightButtonFlag = false;
       }
     }
     else if(i = 4) //if current pin is 4, current led turns yellow (stays yellow)...wait, and move on.
@@ -95,7 +102,7 @@ void levelOne() //The first level layout (1 Target - Slow Speed)
         CircuitPlayground.playTone(261.63, 100); //C4 Note - 1/10th s
         CircuitPlayground.clearPixels();
         delay(1000);
-        //[insert better song here later]
+        //Play Advancing Melody
         CircuitPlayground.playTone(261.63, 100); //C4 - 1/10th s
         CircuitPlayground.playTone(293.67, 100); //D4 - 1/10th s
         CircuitPlayground.playTone(329.63, 100); //E4 - 1/10th s
@@ -104,46 +111,144 @@ void levelOne() //The first level layout (1 Target - Slow Speed)
         levelCounter = 1; //set level counter to level 2 (case 1)
       }
     }
+  }
+}
 
-    /*
-    if(leftButtonFlag) //if left button detect a click, at i is at 4, turn off led. Otherwise, briefly blink red and reduce score by 25%.
+void levelTwo() //Case 1: The second level layout (2 Target - Fast Speed)
+{
+  CircuitPlayground.setPixelColor(2, 0xFFFF00); //establish yellow target location
+  CircuitPlayground.setPixelColor(5, 0xFFC0CB); //establish pink target location
+
+  for(int i = 0; i < 10; i++) //go through all the led one at a time
+  {
+
+    Serial.println(score); //display current score in serial (optional feature)
+
+    if(i != 2 && i != 5) //if pin isn't at 2 nor 5, blink current led pin white.
     {
-      if(i = 4)
-      {
-        CircuitPlayground.setPixelColor(i, 0x000000);
-        //break; //cue level cleared
-      }
-      else
+      CircuitPlayground.setPixelColor(i, 0xFFFFFF);
+      delay(250);
+      CircuitPlayground.setPixelColor(i, 0x000000);
+
+      if(leftButtonFlag || rightButtonFlag) //If LH or RH were pressed during this, briefly blink red and reduce score by 25%, follow by beep.
       {
         if(score > 0)
         {
           CircuitPlayground.setPixelColor(i, 0xFF0000);
           delay(50);
           CircuitPlayground.setPixelColor(i, 0x000000);
+          CircuitPlayground.playTone(130.81, 100); //C3 Note - 1/10th s
+          delay(50);
           score = score - 25;
         }
-        if(score = 0)
+        if(score == 0)
         {
-          break; //cue game over
+          levelCounter = 2; //cue game over
+        }
+        leftButtonFlag = false;
+        rightButtonFlag = false;
+      }
+    }
+    else//else if current pin is 2 or 5.
+    {
+      if(i == 2) //if current pin is 2, current led turns yellow (stays yellow)...wait, and move on.
+      {
+        CircuitPlayground.setPixelColor(i, 0xFFFF00);
+        delay(250);
+
+        if(leftButtonFlag) //if left button detect a click, turn off target led and play a beep.
+        {
+          CircuitPlayground.setPixelColor(i, 0x000000);
+          leftButtonFlag = false;
+          CircuitPlayground.playTone(261.63, 100); //C4 Note - 1/10th s
         }
       }
-      leftButtonFlag = false;
-    }
-    */
+      else if(i == 5) //if current pin is 5, current led turns pink (stays pink)...wait, and move on.
+      {
+        CircuitPlayground.setPixelColor(i, 0xFFC0CB);
+        delay(250);
 
+        if(rightButtonFlag) //if right button detect a click, turn off target led and play a beep. 
+        {
+          CircuitPlayground.setPixelColor(i, 0x000000);
+          rightButtonFlag = false;
+          CircuitPlayground.playTone(261.63, 100); //C4 Note - 1/10th s
+        }
+      }
+    }
+  }
+  if(CircuitPlayground.strip.getPixelColor(2) == 0x000000 && CircuitPlayground.strip.getPixelColor(5) == 0x000000) //if led pin 2 & 5 are out, clear level.
+  {
+      CircuitPlayground.clearPixels();
+      //[Play Sun's Song (LoZ)]
+      CircuitPlayground.playTone(440.00, 250); //A4 - 1/4th s
+      CircuitPlayground.playTone(349.23, 250); //F4 - 1/4th s
+      CircuitPlayground.playTone(587.33, 125); //D5 - 1/8th s
+      delay(375); // rest - 3/8th s
+      CircuitPlayground.playTone(440.00, 250); //A4 - 1/4th s
+      CircuitPlayground.playTone(349.23, 250); //F4 - 1/4th s
+      CircuitPlayground.playTone(587.33, 125); //D5 - 1/8th s
+      delay(375); // rest - 3/8th s
+      CircuitPlayground.playTone(440.00, 125); //A4 - 1/8th s
+      CircuitPlayground.playTone(493.88, 125); //B4 - 1/8th s
+      CircuitPlayground.playTone(523.25, 125); //C5 - 1/8th s
+      CircuitPlayground.playTone(587.33, 125); //D5 - 1/8th s
+      CircuitPlayground.playTone(659.26, 125); //E5 - 1/8th s
+      CircuitPlayground.playTone(698.46, 125); //F5 - 1/8th s
+      CircuitPlayground.playTone(783.99, 250); //A4 - 1/4th s
+      delay(1000);
+      levelCounter = 2; //set level counter to level 3 - Scoreboard (case 2)
   }
 }
 
-/*
-  Ideas...
-    - Create lvls and set them as true or false in the main loop.
-    - Start off with lvl 1 as true. Once cleared, turn false, and set lvl 2 true.
-    - This would require designing the loop each level individually, outside the main loop.
-    - With that said, the only thing coded inside the main loop would be the striker.
-    - Once a striker land on a target (established in each level outside), play a sound.
-    - Once lvl is clear, play melody, wait 5 seconds, and move onto next level.
-
-    Extra
-    - 0xFFC0CB (Pink)
-    - 0xFFFF00 (Yellow)
-*/
+void scoreBoard() //case 2: Score Display (Occur during game over OR all level cleared)
+{
+  CircuitPlayground.clearPixels(); //clear board
+  delay(1000);
+  if(score == 0)
+  {
+    CircuitPlayground.setPixelColor(0, 0xFF0000); //led 1 shines red
+    //Play Game Over (Super Mario World)
+    CircuitPlayground.playTone(220.00, 500); //A3 - 1/2th s
+    CircuitPlayground.playTone(174.61, 250); //F3 - 1/4th s
+    CircuitPlayground.playTone(130.81, 250); //C3 - 1/4th s
+    CircuitPlayground.playTone(220.00, 500); //A3 - 1/2th s
+    CircuitPlayground.playTone(164.81, 500); //E3 - 1/2th s
+    CircuitPlayground.playTone(196.00, 1000); //G3 - 1 s
+    delay(3000);
+  }
+  if(score == 25)
+  {
+    for(int i = 0; i < 3; i++) //led 1-3 shines orange
+    {
+      CircuitPlayground.setPixelColor(i, 0xFFA500);
+    }
+    delay(3000);
+  }
+  if(score == 50)
+  {
+    for(int i = 0; i < 5; i++) //led 1-5 shines yellow
+    {
+      CircuitPlayground.setPixelColor(i, 0xFFFF00);
+    }
+    delay(3000);
+  }
+  if(score == 75)
+  {
+    for(int i = 0; i < 8; i++) //led 1-8 shines green
+    {
+      CircuitPlayground.setPixelColor(i, 0x00FF00);
+    }
+    delay(3000);
+  }
+  if(score == 100)
+  {
+    for(int i = 0; i < 10; i++) //led 1-10 shines green
+    {
+      CircuitPlayground.setPixelColor(i, 0x00FF00);
+    }
+    delay(3000);
+  }
+  CircuitPlayground.clearPixels();
+  levelCounter = 3; //set level counter to level 4 - End Game (case 3)
+}

@@ -19,17 +19,17 @@ Scoring System:
 - If the player's score reaches 0%, the game will end.  
   
 Scoreboard Examples:  
-100% - Represented by 10 LEDs in Green (0 miss)  
-75% - Represented by 7 LEDs in Green (1 miss)  
-50% - Represented by 5 LEDs in Green (2 miss)  
-25% - Represented by 3 LEDs in Green (3 miss)  
-0% - Represented by 1 LED in Red (4 miss)  
+- 100% - Represented by 10 LEDs in Green (0 miss)  
+- 75% - Represented by 7 LEDs in Green (1 miss)  
+- 50% - Represented by 5 LEDs in Green (2 miss)  
+- 25% - Represented by 3 LEDs in Green (3 miss)  
+- 0% - Represented by 1 LED in Red (4 miss)  
   
 Control (input/output):  
-Left Button: For striking yellow targets  
-Right Button: For striking pink targets  
-Levels: Changning Difficulty (Range: 1-2)  
-Scores: Keeping track of Accuracy (Range: 0-100%)  
-Music: The playing of melodies  
+- Left Button: For striking yellow targets  
+- Right Button: For striking pink targets  
+- Levels: Changning Difficulty (Range: 1-2)  
+- Scores: Keeping track of Accuracy (Range: 0-100%)  
+- Music: The playing of melodies  
 
 
